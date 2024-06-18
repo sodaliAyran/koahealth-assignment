@@ -26,6 +26,7 @@ The goal of this project is to create a secure Node.js service that enables user
 - Customers will be able to create new activities.
 - The service needs to use a database.
 
+
 ## Design Decisions
 
 ### Customers will be able to register.
@@ -57,9 +58,10 @@ Since there are relations of this schema I will also need to create:
 **Category**
 - id
 - title
+
+
 **DifficultyLevel**
-- id
-- title
+- level
 
 I will create a database schema to give more details.
 
@@ -91,4 +93,20 @@ I will keep it simple and let every user be able to create new activities. I kno
 Although allowing only the new users after the creation of activity to have access to the new activity is much easier, I think if a new activity is created all users should see it on their lists. Therefore when a new activity is created I will create the necessary **UserActivity**. This operation is very expensive and can be time consuming therefore in an ideal world I would do this using a message queue, updating the database gradually but for this application I will do everything at once.
 
 ### The service needs to use a database.
-Although the task recommends using **MongoDB** or **Postgres* I will use **sqlite** as a database becuase I just want to have a single service up and running without any dependencies. I want anyone to be able to clone this repository and just run the service without needing docker, docker-compose or anything else. 
+Although the task recommends using **MongoDB** or **Postgres** I will use **sqlite** as a database becuase I just want to have a single service up and running without any dependencies. I want anyone to be able to clone this repository and just run the service without needing docker, docker-compose or anything else. 
+
+In the end I'm expecting the database to look like below:
+
+![DB Schema](https://imgur.com/a/xa8XJSF)
+
+And the service structure to look like
+
+![Service Schema](https://imgur.com/MunotS1)
+
+For this implementation I will not utilize any caching but I can go into further details where and how a cache can be utilized during system design interview.
+
+
+## Endpoints
+
+
+## Post Implementation Decisions
