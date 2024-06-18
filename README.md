@@ -97,11 +97,11 @@ Although the task recommends using **MongoDB** or **Postgres** I will use **sqli
 
 In the end I'm expecting the database to look like below:
 
-![DB Schema](https://imgur.com/a/xa8XJSF)
+![DB Schema](https://i.imgur.com/d87wgxT.png)
 
 And the service structure to look like
 
-![Service Schema](https://imgur.com/MunotS1)
+![Service Schema](https://i.imgur.com/MunotS1.png)
 
 For this implementation I will not utilize any caching but I can go into further details where and how a cache can be utilized during system design interview.
 
