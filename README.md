@@ -10,7 +10,15 @@
     1. [Requirements](#requirements)
 2. [Design Decisions](#design-decisions)
 3. [Endpoints](#endpoints)
-4. [Post Implementation Decision](#post-implementation-decisions)
+    1. [/ping](#ping)
+    2. [/register](#register)
+    3. [/login](#login)
+    4. [Create /activity](#create-activity)
+    5. [Read /activity/{id}](#read-activityid)
+    6. [Update /activity/{id}](#update-activityid)
+    7. [/activities](#activities)
+    8. [/completed](#completed)
+5. [Post Implementation Decision](#post-implementation-decisions)
 
 ## Goal
 
@@ -107,6 +115,61 @@ For this implementation I will not utilize any caching but I can go into further
 
 
 ## Endpoints
+### ping
+
+Accepts: GET
+
+Returns: 200
+
+A health check endpoint validate the service is up and running.
+
+### register
+
+Accepts: POST - JSON
+
+Returns: 200, 400
+
+The endpoint to create users. A user will be created using the data that is sent. A regular flow follow:
+
+1. Request hits the endpoint.
+2. User service checks whether the email already exists in the database.
+3. User service checks whether the username already exists in the database.
+4. Password and password confirmation are hashed.
+5. Password and password confirmation hashed are compared to see if they match.
+6. username, email and password hash is saved to the database.
+
+
+### login
+Accepts: POST - JSON
+
+Returns: 200, 400, 401
+
+
+### Create activity
+Accepts: POST - JSON
+
+Returns: 200, 400, 401
+
+### Read activity/{id}
+Accepts: GET
+
+Returns: 200, 401
+
+### Update activity/{id}
+Accepts: UPDATE
+
+Returns: 200, 400, 401
+
+### activities
+Accepts: GET
+
+Returns: 200, 401
+
+### completed
+Accepts: GET
+
+Returns: 200, 401
+
 
 
 ## Post Implementation Decisions
