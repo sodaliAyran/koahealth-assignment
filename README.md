@@ -16,8 +16,9 @@
     4. [Create /activity](#create-activity)
     5. [Read /activity/{id}](#read-activityid)
     6. [Update /activity/{id}](#update-activityid)
-    7. [/activities](#activities)
-    8. [/completed](#completed)
+    7. [Complete /activity{id}](#complete-activityid)
+    8. [/activities](#activities)
+    9. [/completed](#completed)
 5. [Post Implementation Decision](#post-implementation-decisions)
 
 ## Goal
@@ -137,6 +138,8 @@ The endpoint to create users. A user will be created using the data that is sent
 4. Password and password confirmation are hashed.
 5. Password and password confirmation hashed are compared to see if they match.
 6. username, email and password hash is saved to the database.
+7. All activity relations are created for the user.
+8. Service responds with success.
 
 
 ### login
@@ -144,32 +147,84 @@ Accepts: POST - JSON
 
 Returns: 200, 400, 401
 
+The endpoint to log the user and return them a JWT token. Regular flow:
+
+1. Request hits endpoint.
+2. Service checks if the username exists.
+3. Service hashes the password and compares it with the database entry.
+4. Service creates a JWT token with the username.
+5. Service returns the JWT token.
+
 
 ### Create activity
 Accepts: POST - JSON
 
 Returns: 200, 400, 401
 
+This endpoint will allow any user with a JWT token to create new activities. A regular flow will be like:
+1. Request hits the endpoint.
+2. Service checks if the JWT token is valid.
+3. A new activity is created and saved to the database.
+4. For all the users the activity relations are created.
+5. Service responds with success.
+
 ### Read activity/{id}
 Accepts: GET
 
-Returns: 200, 401
+Returns: 200, 204, 401
+
+This endpoint will allow any user to get the details of a single activity. Regular flow:
+1. Request hits the endpoint.
+2. Service checks if the JWT token is valid.
+3. Service gets the activity with the {id}
+4. Service returns the activity details.
 
 ### Update activity/{id}
-Accepts: UPDATE
+Accepts: POST
 
-Returns: 200, 400, 401
+Returns: 200, 204, 400, 401
+
+This endpoint will allow any user to update the details of a single activity. Regular flow:
+1. Request hits the endpoint.
+2. Service checks if the JWT token is valid.
+3. Service updates the activity with the {id} with the request data.
+4. Service returns the activity details.
+
+### Complete activity/{id}
+Accepts: PATCH
+
+Returns: 200, 204, 400, 401
+
+This endpoint will allow any user to mark an activity as completed. Regular flow:
+1. Request hits the endpoint.
+2. Service checks if the JWT token is valid.
+3. Service updates the activity with the {id} for the user as completed or incomplete based on the request.
+4. Service responds with success.
 
 ### activities
 Accepts: GET
 
 Returns: 200, 401
 
+This endpoint will list all the activities of a given user. Flow:
+1. Request hits the endpoint.
+2. Service checks if the JWT token is valid.
+3. Service gathers all the activites of the user from the database.
+4. Service returns the activity details.
+
+
 ### completed
 Accepts: GET
 
 Returns: 200, 401
 
+This endpoint will do pretty much the same operations of /activities endpoınt with the difference of returning only the completed activities.
+1. Request hits the endpoint.
+2. Service checks if the JWT token is valid.
+3. Service gathers all the activites of the user that are marked completed from the database.
+4. Service returns the activity details.
+
 
 
 ## Post Implementation Decisions
+- When I was just about to finish writing the design I realized I'm missing an endpoint to mark activities as completed. Therefore it is missing in the schema.
