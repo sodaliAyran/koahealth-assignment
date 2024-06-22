@@ -8,9 +8,9 @@ const jwt = require('jsonwebtoken');
 
 class UserService {
     static async createUser(username, email, password) {
-        const hashedPassword = bcrypt.hash(password, PASSWORD_SALT);
+        const hashedPassword = await bcrypt.hash(password, PASSWORD_SALT);
         try {
-            await User.create({username, email, hashedPassword});
+            await User.create({username: username, email: email, password: hashedPassword});
             return null;
         } catch (error) {
             return new InputError(error.message);
@@ -20,8 +20,8 @@ class UserService {
     static async loginUser(username, email, password) {
         const user = await this.#findUser(username, email);
         if (!user) return [null, new InputError(USER_NOT_FOUND)];
-        if (!this.#validatePassword(user, password)) return [null, new InputError(INVALID_CREDENTIALS)];
-        return [jwt.sign({ username: user.username }, JWT_SECRET_KEY, { expiresIn: JWT_EXPIRY_HOURS }), null];
+        if (!await this.#validatePassword(user, password)) return [null, new InputError(INVALID_CREDENTIALS)];
+        return [jwt.sign({ userId: user.id }, JWT_SECRET_KEY, { expiresIn: JWT_EXPIRY_HOURS }), null];
     }
 
     static async #findUser(username, email) {

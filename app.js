@@ -31,7 +31,7 @@ app.post('/login', ...loginSchema, async (req, res) => {
   }
   const { username, email, password } = req.body;
   const [token, error] = await UserService.loginUser(username, email, password);
-  return error ? res.sendStatus(error.statusCode) : res.sendStatus(200).json({'token': token});
+  return error ? res.sendStatus(error.statusCode) : res.status(200).json({'token': token});
 });
 
 app.listen(3000, () => {

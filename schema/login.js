@@ -23,6 +23,8 @@ const loginSchema = [
             return true;
           }),
     body('password')
+      .isLength({ min: PASSWORD_MIN_LENGTH })
+      .withMessage(INVALID_PASSWORD),
   ]
 
 module.exports = loginSchema;
