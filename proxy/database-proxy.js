@@ -5,7 +5,7 @@ class Database {
     if (!Database.instance) {
       this._sequelize = new Sequelize({
         dialect: 'sqlite',
-        storage: '../../db.db',
+        storage: './db.sqlite',
       });
       Database.instance = this;
     }

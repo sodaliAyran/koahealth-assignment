@@ -10,6 +10,7 @@ class InternalError extends Error {
 
 class InputError extends Error {
     constructor(message, statusCode) {
+        console.info(message);
         super(message);
         this.statusCode = 400;
     }

@@ -1,15 +1,14 @@
 const express = require('express');
-const db = require('./proxy/database-proxy');
 const UserService = require('./core/user-service');
 const registerSchema = require('./schema/register');
 const loginSchema = require('./schema/login');
 const { validationResult } = require('express-validator');
+const initializeDatabase = require('./proxy/init-db');
 
 const app = express();
 app.use(express.json());
 
-const sequelize = db.getSequelizeInstance();
-sequelize.sync();
+initializeDatabase();
 
 app.get('/ping', (req, res) => {
   return res.sendStatus(200);
@@ -32,10 +31,9 @@ app.post('/login', ...loginSchema, async (req, res) => {
   }
   const { username, email, password } = req.body;
   const [token, error] = await UserService.loginUser(username, email, password);
-  console.log(error);
   return error ? res.sendStatus(error.statusCode) : res.sendStatus(200).json({'token': token});
 });
 
 app.listen(3000, () => {
-  console.log('Server is running on port 3000');
+  console.info('Server is running on port 3000');
 });
