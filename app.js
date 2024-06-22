@@ -1,13 +1,25 @@
-// Load the built-in 'http' module
-const http = require('http');
+const express = require('express');
+const json = require('body-parser');
+const UserService = require('./core/user-service');
+const registerSchema = require('./schema/register');
 
-// Create an HTTP server that responds with "Hello, Node.js!" to all requests
-const server = http.createServer((req, res) => {
-  res.writeHead(200, { 'Content-Type': 'text/plain' });
-  res.end('Hello, Node.js!\n');
+const app = express();
+
+app.post('/register', registerSchema, async (req, res) => {
+  if (!validationResult(req).isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  const { username, email, password } = req.body;
+  const error = await UserService.createUser(username, email, password);
+
+  if (!error){
+    return res.status(200)
+  } else {
+    return res.status(400)
+  }
 });
 
-// Listen on port 3000
-server.listen(3000, 'localhost', () => {
-  console.log('Server is running at http://localhost:3000/');
+app.listen(3000, () => {
+  console.log('Server is running on port 3000');
 });
