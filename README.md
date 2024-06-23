@@ -6,6 +6,7 @@
 5. The service will be up on ```http://localhost:3000``` 
 
 The main reason I did not dockerize this project because at the time of implementing this project I was in Windows and I did not want to deal with docker on Windows.
+
 ---
 
 
@@ -234,3 +235,12 @@ This endpoint will do pretty much the same operations of /activities endpoınt w
 
 ## Post Implementation Decisions
 - When I was just about to finish writing the design I realized I'm missing an endpoint to mark activities as completed. Therefore it is missing in the schema.
+- Since I'm not very familiar with node.js best practices I tried to write the code like I would do other programming languages. My main problem is the error handling. Normall I would just throw exceptions at the bottom levels of the code and have a wrapper function that catches all the custom exception I throw and return related HTTP responses. I was not able to do that here but I'm sure it is possible.
+- Another problem I faced was having database models in different files. For some reason when they are not in the same file my tests were failing therefore I merged them.
+- There is some logging, but Iim surprised that node.js does not log requests by default. I did not dive deep into it and tried to log exceptions mostly but the main problem is I'm using ```console.log``` which is running on the same thread of the application which means it comes with a small performance hit. I could have depended on an external logging library but decided not to do it.
+- Metrics are missing. Usually I would implement a latency metric emitter to show that I care about the metrics but this time I decided to skip it.
+- Test coverage is basically non existent. Normally I would have more unit tests coverage and a test database to check end to end functionality. Due to this being an interview question I wrote some tests to show that I do write tests. You can even check my commit history I write tests while I'm writing the code.
+- No pagination. Since this is a small project I decided not to have pagination because I did not want to change my list endpoints from GET to POST and I did not want to have url parameters.
+- No dynamic code documentation such as OpenAPI. I decided to use this README as the main API documentation.
+- The biggest bottleneck of this service is the User and Activity creation. If you check the code when I'm doing these operations I basically load every user and activity to the memory than query the database. This is not a scalable solution I'm aware and I'm happy to discuss alternatives in a system design interview.
+- No caching mechasnism either. Again I'm happy to discuss these during system design interview.
