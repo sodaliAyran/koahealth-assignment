@@ -1,5 +1,5 @@
 const { Category, DifficultyLevel, Activity } = require('../models');
-const db = require('../proxy/database-proxy');
+const db = require('./database-proxy');
 
 const sequelize = db.getSequelizeInstance();
 
