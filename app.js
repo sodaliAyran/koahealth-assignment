@@ -22,8 +22,7 @@ app.post('/register', ...registerSchema, async (req, res) => {
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
   }
-  const { username, email, password } = req.body;
-  let [user, error] = await UserService.createUser(username, email, password);
+  let [user, error] = await UserService.createUser(req.body);
   if (error) return res.sendStatus(error.statusCode);
   
   error = await ActivityService.createUserActivities(user);
@@ -38,8 +37,7 @@ app.post('/login', ...loginSchema, async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) return res.status(400).json({errors: errors.array()});
 
-  const { username, email, password } = req.body;
-  const [token, error] = await UserService.loginUser(username, email, password);
+  const [token, error] = await UserService.loginUser(req.body);
   return error ? res.sendStatus(error.statusCode) : res.status(200).json({'token': token});
 });
 
@@ -50,9 +48,7 @@ app.post('/activity', ...createActivitySchema, async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
-  const { title, description, duration, content, categoryId, difficultyLevelId } = req.body;
-  [activity, error] = await ActivityService.createActivity(title, description, duration, 
-    content, categoryId, difficultyLevelId);
+  [activity, error] = await ActivityService.createActivity(req.body);
   if (error) res.sendStatus(error.statusCode);
 
   error = await UserService.createUserActivities(activity);
@@ -82,6 +78,26 @@ app.patch('/activity/:id', ...updateActivitySchema, async (req, res) => {
   [activity, error] = await ActivityService.updateActivity(req.params.id, req.body);
   return error ? res.sendStatus(error.statusCode) : res.status(200).json(activity);
 
+});
+
+app.get('/user/:id/activities', async (req, res) => {
+  let [userId, error] = UserService.authUser(req.headers['authorization']);
+  if (error) return res.sendStatus(error.statusCode);
+  error = UserService.validateUserId(userId, req.params.id);
+  if (error) return res.sendStatus(error.statusCode);
+
+  [activities, error] = await ActivityService.getUserActivities(userId);
+  return error ? res.sendStatus(error.statusCode) : res.status(200).json(activities);
+});
+
+app.get('/user/:id/completed', async (req, res) => {
+  let [userId, error] = UserService.authUser(req.headers['authorization']);
+  if (error) return res.sendStatus(error.statusCode);
+  error = UserService.validateUserId(userId, req.params.id);
+  if (error) return res.sendStatus(error.statusCode);
+
+  [activities, error] = await ActivityService.getUserCompletedActivities(userId);
+  return error ? res.sendStatus(error.statusCode) : res.status(200).json(activities);
 });
 
 app.listen(3000, () => {

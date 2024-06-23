@@ -3,6 +3,19 @@ const { InputError, InternalError, NotFoundError } = require("../constants/error
 const { Activity, UserActivity, Category, DifficultyLevel } = require("../models");
 
 class ActivityService {
+    static async getUserActivities(userId) {
+        try {
+            const activities = await UserActivity.findAll({where: {
+                userId: userId}, 
+                include: [{model: Activity, include: [Category, DifficultyLevel]}]
+            });
+            return [activities, null];
+        } catch (error) {
+            return [null, new InternalError(error.message)];
+        }
+
+    }
+
     static async createUserActivities(user) {
         try {
             const activities = await Activity.findAll();
@@ -19,24 +32,16 @@ class ActivityService {
         }
     }
 
-    static async createActivity(title, description, duration, 
-        content, categoryId, difficultyLevelId) {
+    static async createActivity(values) {
 
-        const category = await Category.findByPk(categoryId);
+        const category = await Category.findByPk(values.categoryId);
         if (!category) {return [null, new InputError(CATEGORY_NOT_FOUND)]}
 
-        const difficultyLevel = await DifficultyLevel.findByPk(difficultyLevelId);
+        const difficultyLevel = await DifficultyLevel.findByPk(values.difficultyLevelId);
         if (!difficultyLevel) {return [null, new InputError(DIFFICULTY_NOT_FOUND)]}
 
         try {
-            const activity = await Activity.create({
-                title: title,
-                description: description,
-                duration: duration,
-                content: content,
-                categoryId: category.id,
-                difficultyLevelId: difficultyLevel.id
-            });
+            const activity = await Activity.create(values);
             return [activity, null];
         } catch (error) {
             return [null, new InternalError(INTERNAL_SERVER_ERROR)];

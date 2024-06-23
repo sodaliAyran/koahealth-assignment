@@ -23,10 +23,10 @@ class UserService {
         }
     }
 
-    static async createUser(username, email, password) {
+    static async createUser(values) {
         const hashedPassword = await bcrypt.hash(password, PASSWORD_SALT);
         try {
-            const user = await User.create({username: username, email: email, password: hashedPassword});
+            const user = await User.create(values);
             return [user, null];
         } catch (error) {
             return [null, new InputError(error.message)];
@@ -45,6 +45,10 @@ class UserService {
             if (error) return [null, new AuthorizationError()];
             return [data.userId, null];
         });
+    }
+
+    static validateUserId(jwtUserId, pathUserId) {
+        return jwtUserId == pathUserId ? null : new AuthorizationError();
     }
 
     static async loginUser(username, email, password) {
