@@ -1,6 +1,6 @@
 const bcrypt = require('bcryptjs');
 const { PASSWORD_SALT, JWT_EXPIRY_HOURS, JWT_SECRET_KEY} = require('../constants/config');
-const { InputError, InternalError } = require('../constants/errors');
+const { InputError, InternalError, AuthorizationError } = require('../constants/errors');
 const { where } = require('sequelize');
 const { USER_NOT_FOUND, INVALID_CREDENTIALS, INTERNAL_SERVER_ERROR } = require('../constants/error-messages');
 const jwt = require('jsonwebtoken');
@@ -35,6 +35,16 @@ class UserService {
 
     static async deleteUser(user) {
         User.destroy({where: {id: user.id}})
+    }
+
+    static authUser(authHeader) {
+        const token = authHeader && authHeader.split(' ')[1];
+        if (!token) return [null, new AuthorizationError()];
+
+        return jwt.verify(token, JWT_SECRET_KEY, (error, data) => {
+            if (error) return [null, new AuthorizationError()];
+            return [data.userId, null];
+        });
     }
 
     static async loginUser(username, email, password) {

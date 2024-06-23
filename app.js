@@ -6,6 +6,7 @@ const { validationResult } = require('express-validator');
 const initializeDatabase = require('./proxy/init-db');
 const createActivitySchema = require('./schema/create-activity');
 const ActivityService = require('./core/activity-service');
+const updateActivitySchema = require('./schema/update-activity');
 
 const app = express();
 app.use(express.json());
@@ -23,7 +24,7 @@ app.post('/register', ...registerSchema, async (req, res) => {
   }
   const { username, email, password } = req.body;
   let [user, error] = await UserService.createUser(username, email, password);
-  if (error) { return res.sendStatus(error.statusCode) }
+  if (error) return res.sendStatus(error.statusCode);
   
   error = await ActivityService.createUserActivities(user);
   if (error) {
@@ -35,23 +36,24 @@ app.post('/register', ...registerSchema, async (req, res) => {
 
 app.post('/login', ...loginSchema, async (req, res) => {
   const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
+  if (!errors.isEmpty()) return res.status(400).json({errors: errors.array()});
+
   const { username, email, password } = req.body;
   const [token, error] = await UserService.loginUser(username, email, password);
   return error ? res.sendStatus(error.statusCode) : res.status(200).json({'token': token});
 });
 
 app.post('/activity', ...createActivitySchema, async (req, res) => {
+  let [_, error] = UserService.authUser(req.headers['authorization']);
+  if (error) return res.sendStatus(error.statusCode);
+
   const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
+  if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+
   const { title, description, duration, content, categoryId, difficultyLevelId } = req.body;
-  let [activity, error] = await ActivityService.createActivity(title, description, duration, 
+  [activity, error] = await ActivityService.createActivity(title, description, duration, 
     content, categoryId, difficultyLevelId);
-  if (error) { res.sendStatus(error.statusCode) };
+  if (error) res.sendStatus(error.statusCode);
 
   error = await UserService.createUserActivities(activity);
   if (error) {
@@ -59,6 +61,27 @@ app.post('/activity', ...createActivitySchema, async (req, res) => {
     return res.sendStatus(error.statusCode);
   }
   return res.sendStatus(200);
+});
+
+app.get('/activity/:id', async (req, res) => {
+  let [_, error] = UserService.authUser(req.headers['authorization']);
+  if (error) return res.sendStatus(error.statusCode);
+
+  [activity, error] = await ActivityService.getActivity(req.params.id);
+  return error ? res.sendStatus(error.statusCode) : res.status(200).json(activity);
+
+});
+
+app.patch('/activity/:id', ...updateActivitySchema, async (req, res) => {
+  let [_, error] = UserService.authUser(req.headers['authorization']);
+  if (error) return res.sendStatus(error.statusCode);
+
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+
+  [activity, error] = await ActivityService.updateActivity(req.params.id, req.body);
+  return error ? res.sendStatus(error.statusCode) : res.status(200).json(activity);
+
 });
 
 app.listen(3000, () => {

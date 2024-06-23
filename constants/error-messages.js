@@ -15,6 +15,7 @@ const CATEGORY_ID_INVALID = 'Category ID must be an integer';
 const DIFFICULTY_LEVEL_INVALID = 'Difficulty Level ID must be an integer';
 const CATEGORY_NOT_FOUND = 'Category not found';
 const DIFFICULTY_NOT_FOUND = 'Difficulty Level not found';
+const ACTIVITY_NOT_FOUND = 'Activity not found';
 
 module.exports = {
     USERNAME_REQUIRED,
@@ -31,5 +32,6 @@ module.exports = {
     CATEGORY_ID_INVALID,
     DIFFICULTY_LEVEL_INVALID,
     CATEGORY_NOT_FOUND,
-    DIFFICULTY_NOT_FOUND
+    DIFFICULTY_NOT_FOUND,
+    ACTIVITY_NOT_FOUND
 }

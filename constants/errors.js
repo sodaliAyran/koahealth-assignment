@@ -1,19 +1,35 @@
-const { INTERNAL_SERVER_ERROR } = require("./error-messages");
+const { INTERNAL_SERVER_ERROR, INVALID_CREDENTIALS } = require("./error-messages");
 
-class InternalError extends Error {
+class AppError extends Error {
     constructor(message, statusCode) {
-        console.error(message);
-        super(INTERNAL_SERVER_ERROR);
-        this.statusCode = 500;
-    }
-}
-
-class InputError extends Error {
-    constructor(message, statusCode) {
-        console.info(message);
         super(message);
-        this.statusCode = 400;
+        this.statusCode = statusCode;
+        console.info(message);
+    }
+}
+class InternalError extends AppError {
+    constructor(message) {
+        console.error(message);
+        super(INTERNAL_SERVER_ERROR, 500);
     }
 }
 
-module.exports = {InternalError, InputError};
+class InputError extends AppError {
+    constructor(message) {
+        super(message, 400);
+    }
+}
+
+class NotFoundError extends AppError {
+    constructor(message) {
+        super(message, 404);
+    }
+}
+
+class AuthorizationError extends AppError {
+    constructor() {
+        super(INVALID_CREDENTIALS, 401);
+    }
+}
+
+module.exports = {InternalError, InputError, AuthorizationError, NotFoundError};
