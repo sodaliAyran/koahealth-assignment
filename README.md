@@ -7,6 +7,11 @@
 
 The main reason I did not dockerize this project because at the time of implementing this project I was in Windows and I did not want to deal with docker on Windows.
 
+### How to Run tests
+1. Run ```npm test```
+
+To be honest I don't know if jest is a popular testing framework I used it because it was the first testing library ChatGPT suggested.
+
 ---
 
 
@@ -24,8 +29,8 @@ The main reason I did not dockerize this project because at the time of implemen
     5. [Read /activity/{id}](#read-activityid)
     6. [Update /activity/{id}](#update-activityid)
     7. [Complete /activity{id}](#complete-activityid)
-    8. [/activities](#activities)
-    9. [/completed](#completed)
+    8. [/activities](#list-user-activities)
+    9. [/completed](#list-user-completed-activities)
 5. [Post Implementation Decision](#post-implementation-decisions)
 
 ## Goal
@@ -123,6 +128,9 @@ For this implementation I will not utilize any caching but I can go into further
 
 
 ## Endpoints
+I added ```insomnia-requests``` file. You can import it to run requests using Insomnia or Postman. You may need to change the values though. 
+I suggest you use that because copy pasting curl commands can be problematic.
+
 ### ping
 
 Accepts: GET
@@ -131,11 +139,23 @@ Returns: 200
 
 A health check endpoint validate the service is up and running.
 
+Example request: ```curl localhost:3000/ping```
+
 ### register
 
-Accepts: POST - JSON
+Accepts: POST - application/json
 
 Returns: 200, 400
+
+Example request body:
+```
+{
+    "username": "test",
+	"email": "test@example.com",
+	"password": "testpw",
+	"confirmPassword": "testpw"
+}
+```
 
 The endpoint to create users. A user will be created using the data that is sent. A regular flow follow:
 
@@ -148,11 +168,31 @@ The endpoint to create users. A user will be created using the data that is sent
 7. All activity relations are created for the user.
 8. Service responds with success.
 
+ Example request: 
+ ```
+curl -X POST http://localhost:3000/register \
+-H "Content-Type: application/json" \
+-d '{
+    "username": "test",
+	"email": "test@example.com",
+	"password": "testpw",
+	"confirmPassword": "testpw"
+}'
+ ```
+
 
 ### login
-Accepts: POST - JSON
+Accepts: POST - application/json
 
 Returns: 200, 400, 401
+
+Example request body:
+```
+{
+    "username": "test",
+	"password": "testpw",
+}
+```
 
 The endpoint to log the user and return them a JWT token. Regular flow:
 
@@ -162,11 +202,36 @@ The endpoint to log the user and return them a JWT token. Regular flow:
 4. Service creates a JWT token with the username.
 5. Service returns the JWT token.
 
+Example request:
+
+ ```
+curl -X POST http://localhost:3000/login \
+-H "Content-Type: application/json" \
+-d '{
+    "username": "test",
+	"password": "testpw",
+}'
+ ```
+
 
 ### Create activity
-Accepts: POST - JSON
+Accepts: POST - application/json
 
 Returns: 200, 400, 401
+
+Example request body:
+
+ ```
+{
+	"title": "new activity title",
+	"description": "test description",
+	"duration": 12,
+	"content": "test",
+	"categoryId": 1,
+	"difficultyLevelId": 3
+}
+ ```
+
 
 This endpoint will allow any user with a JWT token to create new activities. A regular flow will be like:
 1. Request hits the endpoint.
@@ -174,6 +239,23 @@ This endpoint will allow any user with a JWT token to create new activities. A r
 3. A new activity is created and saved to the database.
 4. For all the users the activity relations are created.
 5. Service responds with success.
+
+Example request:
+
+ ```
+curl -X POST http://localhost:3000/activity \
+-H "Content-Type: application/json" \
+-H "Authorization: Bearer TESTTOKEN" \
+-d '{
+	"title": "new activity title",
+	"description": "test description",
+	"duration": 12,
+	"content": "test",
+	"categoryId": 1,
+	"difficultyLevelId": 3
+}'
+ ```
+
 
 ### Read activity/{id}
 Accepts: GET
@@ -186,10 +268,25 @@ This endpoint will allow any user to get the details of a single activity. Regul
 3. Service gets the activity with the {id}
 4. Service returns the activity details.
 
+Example request:
+
+ ```
+curl http://localhost:3000/activity/1 -H "Authorization: Bearer TESTTOKEN"
+ ```
+
 ### Update activity/{id}
-Accepts: POST
+Accepts: PATCH - application/json
 
 Returns: 200, 204, 400, 401
+
+Example request body:
+
+ ```
+{
+	"title": "updated title 1",
+	"categoryId": 1
+}
+ ```
 
 This endpoint will allow any user to update the details of a single activity. Regular flow:
 1. Request hits the endpoint.
@@ -197,10 +294,34 @@ This endpoint will allow any user to update the details of a single activity. Re
 3. Service updates the activity with the {id} with the request data.
 4. Service returns the activity details.
 
-### Complete activity/{id}
-Accepts: PATCH
+ ```
+curl -X PATCH http://localhost:3000/activity/2 \
+-H "Content-Type: application/json" \
+-H "Authorization: Bearer TESTTOKEN" \
+-d '{
+	"title": "updated activity title",
+	"description": "updated description",
+	"duration": 33,
+	"content": "updated",
+	"categoryId": 1,
+	"difficultyLevelId": 1
+}'
+ ```
+
+### Complete /activity/{id}
+Accepts: PATCH - application/json
 
 Returns: 200, 204, 400, 401
+
+Example request body:
+
+ ```
+{
+	"isCompleted": true
+}
+ ```
+
+**Keep in mind that the id here is the id of the relation not the activity.**
 
 This endpoint will allow any user to mark an activity as completed. Regular flow:
 1. Request hits the endpoint.
@@ -208,7 +329,16 @@ This endpoint will allow any user to mark an activity as completed. Regular flow
 3. Service updates the activity with the {id} for the user as completed or incomplete based on the request.
 4. Service responds with success.
 
-### activities
+ ```
+curl -X PATCH http://localhost:3000/user/activities/1 \
+-H "Content-Type: application/json" \
+-H "Authorization: Bearer TESTTOKEN" \
+-d '{
+	"isCompleted": true
+}'
+ ```
+
+### List user activities
 Accepts: GET
 
 Returns: 200, 401
@@ -219,8 +349,14 @@ This endpoint will list all the activities of a given user. Flow:
 3. Service gathers all the activites of the user from the database.
 4. Service returns the activity details.
 
+Example request:
 
-### completed
+ ```
+curl http://localhost:3000/user/activities -H "Authorization: Bearer TESTTOKEN"
+ ```
+
+
+### List user completed activities
 Accepts: GET
 
 Returns: 200, 401
@@ -230,6 +366,13 @@ This endpoint will do pretty much the same operations of /activities endpoınt w
 2. Service checks if the JWT token is valid.
 3. Service gathers all the activites of the user that are marked completed from the database.
 4. Service returns the activity details.
+
+Example request:
+
+ ```
+curl http://localhost:3000/user/completed -H "Authorization: Bearer TESTTOKEN"
+ ```
+
 
 
 
@@ -241,6 +384,9 @@ This endpoint will do pretty much the same operations of /activities endpoınt w
 - Metrics are missing. Usually I would implement a latency metric emitter to show that I care about the metrics but this time I decided to skip it.
 - Test coverage is basically non existent. Normally I would have more unit tests coverage and a test database to check end to end functionality. Due to this being an interview question I wrote some tests to show that I do write tests. You can even check my commit history I write tests while I'm writing the code.
 - No pagination. Since this is a small project I decided not to have pagination because I did not want to change my list endpoints from GET to POST and I did not want to have url parameters.
+- There aren't any DELETE endpoint because I did not ant to give users the ability to delete database objects.
+- I did not dive deep into request body validation and response formatting. They are important but they need further specifications.
 - No dynamic code documentation such as OpenAPI. I decided to use this README as the main API documentation.
 - The biggest bottleneck of this service is the User and Activity creation. If you check the code when I'm doing these operations I basically load every user and activity to the memory than query the database. This is not a scalable solution I'm aware and I'm happy to discuss alternatives in a system design interview.
 - No caching mechasnism either. Again I'm happy to discuss these during system design interview.
+- Most of the code is written by ChatGPT. Hopefully, in the future generative models will be able to write a project like this just by looking at the specifications.
