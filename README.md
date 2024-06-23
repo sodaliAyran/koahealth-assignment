@@ -1,5 +1,11 @@
 ### How to Run the Service
+1. Make sure you have ```npm``` and ```node```
+2. Clone this package.
+3. Change directory to the package and run ```npm install```
+4. Run ```node app.js```
+5. The service will be up on ```http://localhost:3000``` 
 
+The main reason I did not dockerize this project because at the time of implementing this project I was in Windows and I did not want to deal with docker on Windows.
 ---
 
 
