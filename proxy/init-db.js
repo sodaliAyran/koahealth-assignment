@@ -1,6 +1,4 @@
-const Activity = require("../model/activity");
-const Category = require("../model/category");
-const DifficultyLevel = require("../model/difficulty-level");
+const { Category, DifficultyLevel, Activity } = require('../models');
 const db = require('../proxy/database-proxy');
 
 const sequelize = db.getSequelizeInstance();
