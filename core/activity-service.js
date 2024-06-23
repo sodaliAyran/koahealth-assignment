@@ -13,7 +13,18 @@ class ActivityService {
         } catch (error) {
             return [null, new InternalError(error.message)];
         }
+    }
 
+    static async getUserCompletedActivities(userId) {
+        try {
+            const activities = await UserActivity.findAll({where: {
+                userId: userId, isCompleted: true}, 
+                include: [{model: Activity, include: [Category, DifficultyLevel]}]
+            });
+            return [activities, null];
+        } catch (error) {
+            return [null, new InternalError(error.message)];
+        }
     }
 
     static async createUserActivities(user) {
@@ -74,7 +85,19 @@ class ActivityService {
         } catch (error) {
             return [null, new InternalError(error.message)];
         }
-}
+    }
+
+    static async updateUserActivity(id, values) {
+        try {
+            const [affectedRows] = await UserActivity.update(values, {where: {id: id}});
+            if (affectedRows > 0) {
+                return null;
+            }
+            return new NotFoundError(ACTIVITY_NOT_FOUND);
+        } catch (error) {
+            return new InternalError(error.message);
+        }
+    }
 }
 
 module.exports = ActivityService

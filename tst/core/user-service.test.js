@@ -27,7 +27,7 @@ describe("createUser", () => {
     bcrypt.hash = jest.fn().mockReturnValue(hashedPassword);
     User.create.mockReturnValue(mockUser);
 
-    const [user, error] = await UserService.createUser(username, email, password);
+    const [user, error] = await UserService.createUser(mockUser);
     expect(User.create).toBeCalledWith({username: username, email: email, password: hashedPassword});
     expect(error).toBe(null);
     expect(user).toBe(mockUser);
@@ -38,7 +38,7 @@ describe("createUser", () => {
     bcrypt.hash = jest.fn().mockReturnValue(hashedPassword);
     User.create.mockRejectedValue(creationError);
 
-    const [user, error] = await UserService.createUser(username, email, password);
+    const [user, error] = await UserService.createUser(mockUser);
 
     expect(User.create).toBeCalledWith({username: username, email: email, password: hashedPassword});
     expect(error).toStrictEqual(creationError);

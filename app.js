@@ -7,6 +7,7 @@ const initializeDatabase = require('./proxy/init-db');
 const createActivitySchema = require('./schema/create-activity');
 const ActivityService = require('./core/activity-service');
 const updateActivitySchema = require('./schema/update-activity');
+const completeActivitySchema = require('./schema/complete-activity');
 
 const app = express();
 app.use(express.json());
@@ -80,25 +81,32 @@ app.patch('/activity/:id', ...updateActivitySchema, async (req, res) => {
 
 });
 
-app.get('/user/:id/activities', async (req, res) => {
+app.get('/user/activities', async (req, res) => {
   let [userId, error] = UserService.authUser(req.headers['authorization']);
-  if (error) return res.sendStatus(error.statusCode);
-  error = UserService.validateUserId(userId, req.params.id);
   if (error) return res.sendStatus(error.statusCode);
 
   [activities, error] = await ActivityService.getUserActivities(userId);
   return error ? res.sendStatus(error.statusCode) : res.status(200).json(activities);
 });
 
-app.get('/user/:id/completed', async (req, res) => {
+app.get('/user/completed', async (req, res) => {
   let [userId, error] = UserService.authUser(req.headers['authorization']);
-  if (error) return res.sendStatus(error.statusCode);
-  error = UserService.validateUserId(userId, req.params.id);
   if (error) return res.sendStatus(error.statusCode);
 
   [activities, error] = await ActivityService.getUserCompletedActivities(userId);
   return error ? res.sendStatus(error.statusCode) : res.status(200).json(activities);
 });
+
+app.patch('/user/activities/:id', ...completeActivitySchema, async (req, res) => {
+  let [userId, error] = UserService.authUser(req.headers['authorization']);
+  if (error) return res.sendStatus(error.statusCode);
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+
+  error = await ActivityService.updateUserActivity(req.params.id, req.body);
+  return error ? res.sendStatus(error.statusCode) : res.sendStatus(200);
+});
+
 
 app.listen(3000, () => {
   console.info('Server is running on port 3000');

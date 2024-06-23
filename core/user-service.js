@@ -24,9 +24,9 @@ class UserService {
     }
 
     static async createUser(values) {
-        const hashedPassword = await bcrypt.hash(password, PASSWORD_SALT);
+        const hashedPassword = await bcrypt.hash(values.password, PASSWORD_SALT);
         try {
-            const user = await User.create(values);
+            const user = await User.create({username: values.username, email: values.email, password: hashedPassword});
             return [user, null];
         } catch (error) {
             return [null, new InputError(error.message)];
@@ -47,14 +47,10 @@ class UserService {
         });
     }
 
-    static validateUserId(jwtUserId, pathUserId) {
-        return jwtUserId == pathUserId ? null : new AuthorizationError();
-    }
-
-    static async loginUser(username, email, password) {
-        const user = await this.#findUser(username, email);
+    static async loginUser(values) {
+        const user = await this.#findUser(values.username, values.email);
         if (!user) return [null, new InputError(USER_NOT_FOUND)];
-        if (!await this.#validatePassword(user, password)) return [null, new InputError(INVALID_CREDENTIALS)];
+        if (!await this.#validatePassword(user, values.password)) return [null, new InputError(INVALID_CREDENTIALS)];
         return [jwt.sign({ userId: user.id }, JWT_SECRET_KEY, { expiresIn: JWT_EXPIRY_HOURS }), null];
     }
 
