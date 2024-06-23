@@ -1,14 +1,14 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const  UserService = require("../../core/user-service");
-const { PASSWORD_SALT } = require('../../constants/config');
-const { InputError, InternalError } = require('../../constants/errors');
-const { User, UserActivity } = require('../../models');
+const  UserService = require("../../src/core/user-service");
+const { PASSWORD_SALT } = require('../../src/constants/config');
+const { InputError, InternalError } = require('../../src/constants/errors');
+const { User, UserActivity } = require('../../src/models');
 
 
 jest.mock('bcryptjs');
 jest.mock('jsonwebtoken');
-jest.mock('../../models');
+jest.mock('../../src/models');
 
 const username = 'testuser';
 const email = 'testuser@example.com';
@@ -52,7 +52,7 @@ describe("loginUser", () => {
     bcrypt.compare = jest.fn().mockReturnValue(true);
     User.findOne.mockReturnValue(mockUser);
 
-    const [token, error] = await UserService.loginUser(username, '', password);
+    const [token, error] = await UserService.loginUser({username: username, password: password});
 
     expect(User.findOne).toBeCalledWith({where: {username: username}});
     expect(error).toBe(null);

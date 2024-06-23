@@ -1,13 +1,13 @@
 const express = require('express');
-const UserService = require('./core/user-service');
-const registerSchema = require('./schema/register');
-const loginSchema = require('./schema/login');
+const UserService = require('./src/core/user-service');
+const registerSchema = require('./src/schema/register');
+const loginSchema = require('./src/schema/login');
 const { validationResult } = require('express-validator');
-const initializeDatabase = require('./proxy/init-db');
-const createActivitySchema = require('./schema/create-activity');
-const ActivityService = require('./core/activity-service');
-const updateActivitySchema = require('./schema/update-activity');
-const completeActivitySchema = require('./schema/complete-activity');
+const initializeDatabase = require('./src/proxy/init-db');
+const createActivitySchema = require('./src/schema/create-activity');
+const ActivityService = require('./src/core/activity-service');
+const updateActivitySchema = require('./src/schema/update-activity');
+const completeActivitySchema = require('./src/schema/complete-activity');
 
 const app = express();
 app.use(express.json());
@@ -98,7 +98,7 @@ app.get('/user/completed', async (req, res) => {
 });
 
 app.patch('/user/activities/:id', ...completeActivitySchema, async (req, res) => {
-  let [userId, error] = UserService.authUser(req.headers['authorization']);
+  let [_, error] = UserService.authUser(req.headers['authorization']);
   if (error) return res.sendStatus(error.statusCode);
   const errors = validationResult(req);
   if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
